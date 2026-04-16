@@ -1,88 +1,33 @@
 """
 dataset_loader.py
 -----------------
-Utilities for loading image datasets from a directory structure using
-``keras.utils.image_dataset_from_directory``.
-
-Expected directory layout
-(one sub-folder per class label)::
-
-    dataset_root/
-        class_a/
-            img1.jpg
-            img2.jpg
-        class_b/
-            img3.jpg
-            ...
+Placeholder module for dataset loading utilities.
+Full implementation will be added in the next commit.
 """
 
-import tensorflow as tf
 
-
-def load_dataset(
-    directory: str,
-    image_size: tuple = (224, 224),
-    batch_size: int = 32,
-    validation_split: float = 0.2,
-    seed: int = 42,
-):
-    """Load an image dataset split into training and validation subsets.
-
-    Parameters
-    ----------
-    directory : str
-        Root directory of the dataset. Sub-folders are treated as class labels.
-    image_size : tuple
-        Target ``(height, width)`` to resize all images to.
-    batch_size : int
-        Number of samples per batch.
-    validation_split : float
-        Fraction of data reserved for validation (0 < split < 1).
-    seed : int
-        Random seed used for the train/validation split.
-
-    Returns
-    -------
-    train_ds : tf.data.Dataset
-    val_ds : tf.data.Dataset
-    class_names : list[str]
-        Ordered list of class label strings inferred from sub-folder names.
+def load_dataset(dataset_path, image_size, batch_size, seed):
     """
-    shared_kwargs = dict(
-        validation_split=validation_split,
-        seed=seed,
-        image_size=image_size,
-        batch_size=batch_size,
-    )
-
-    train_ds = tf.keras.utils.image_dataset_from_directory(
-        directory,
-        subset="training",
-        **shared_kwargs,
-    )
-
-    val_ds = tf.keras.utils.image_dataset_from_directory(
-        directory,
-        subset="validation",
-        **shared_kwargs,
-    )
-
-    class_names = train_ds.class_names
-    return train_ds, val_ds, class_names
-
-
-def prefetch_dataset(dataset: tf.data.Dataset) -> tf.data.Dataset:
-    """Apply caching and prefetching for improved training throughput.
-
-    Parameters
-    ----------
-    dataset : tf.data.Dataset
-        A batched ``tf.data.Dataset``.
-
-    Returns
-    -------
-    tf.data.Dataset
-        The same dataset with ``.cache().prefetch()`` applied.
+    Loads dataset using keras.utils.image_dataset_from_directory.
+    Will support training, validation and test splits.
+    Implementation will be added in the next commit.
     """
-    autotune = tf.data.AUTOTUNE
-    return dataset.cache().prefetch(buffer_size=autotune)
+    pass
+
+
+def split_dataset(dataset, train_ratio=0.7, val_ratio=0.1):
+    """
+    Splits a tf.data.Dataset into train, validation, and test subsets.
+    Default ratios produce a 70 / 10 / 20 split.
+    Implementation will be added in the next commit.
+    """
+    pass
+
+
+def prepare_dataset(dataset):
+    """
+    Applies caching and prefetching to a tf.data.Dataset for improved
+    training throughput using tf.data.AUTOTUNE.
+    Implementation will be added in the next commit.
+    """
+    pass
