@@ -11,6 +11,26 @@ import tensorflow as tf
 from tensorflow import keras
 
 
+def default_callbacks(model_path=None, patience=4):
+    """Create standard callbacks for the project experiments."""
+    callbacks = [
+        keras.callbacks.EarlyStopping(
+            monitor="val_loss",
+            patience=patience,
+            restore_best_weights=True,
+        )
+    ]
+    if model_path:
+        callbacks.append(
+            keras.callbacks.ModelCheckpoint(
+                model_path,
+                monitor="val_loss",
+                save_best_only=True,
+            )
+        )
+    return callbacks
+
+
 def train_model(
     model: keras.Model,
     train_ds: tf.data.Dataset,

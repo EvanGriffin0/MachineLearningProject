@@ -14,6 +14,11 @@ from tensorflow import keras
 def build_cnn_model(
     input_shape: tuple = (224, 224, 3),
     num_classes: int = 10,
+    conv_filters: tuple = (32, 64, 128),
+    dense_units: int = 256,
+    dropout_rate: float = 0.5,
+    learning_rate: float = 1e-3,
+    use_augmentation: bool = False,
 ) -> keras.Model:
     """Build and return a simple CNN model compiled and ready for training.
 
@@ -34,33 +39,41 @@ def build_cnn_model(
     keras.Model
         Compiled Keras model.
     """
-    model = keras.Sequential(
+    layers = [
+        keras.Input(shape=input_shape),
+        keras.layers.Rescaling(1.0 / 255),
+    ]
+
+    if use_augmentation:
+        layers.extend(
+            [
+                keras.layers.RandomFlip("horizontal"),
+                keras.layers.RandomRotation(0.08),
+                keras.layers.RandomZoom(0.1),
+            ]
+        )
+
+    for filters in conv_filters:
+        layers.extend(
+            [
+                keras.layers.Conv2D(filters, (3, 3), activation="relu", padding="same"),
+                keras.layers.MaxPooling2D((2, 2)),
+            ]
+        )
+
+    layers.extend(
         [
-            keras.Input(shape=input_shape),
-
-            # --- Block 1 ---
-            keras.layers.Conv2D(32, (3, 3), activation="relu", padding="same"),
-            keras.layers.MaxPooling2D((2, 2)),
-
-            # --- Block 2 ---
-            keras.layers.Conv2D(64, (3, 3), activation="relu", padding="same"),
-            keras.layers.MaxPooling2D((2, 2)),
-
-            # --- Block 3 ---
-            keras.layers.Conv2D(128, (3, 3), activation="relu", padding="same"),
-            keras.layers.MaxPooling2D((2, 2)),
-
-            # --- Classifier head ---
             keras.layers.Flatten(),
-            keras.layers.Dense(256, activation="relu"),
-            keras.layers.Dropout(0.5),
+            keras.layers.Dense(dense_units, activation="relu"),
+            keras.layers.Dropout(dropout_rate),
             keras.layers.Dense(num_classes, activation="softmax"),
-        ],
-        name="cnn_from_scratch",
+        ]
     )
 
+    model = keras.Sequential(layers, name="cnn_from_scratch")
+
     model.compile(
-        optimizer="adam",
+        optimizer=keras.optimizers.Adam(learning_rate=learning_rate),
         loss="sparse_categorical_crossentropy",
         metrics=["accuracy"],
     )

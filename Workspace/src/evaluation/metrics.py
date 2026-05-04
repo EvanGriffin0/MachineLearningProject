@@ -11,6 +11,7 @@ functions below.
 
 import numpy as np
 import tensorflow as tf
+from timeit import default_timer as timer
 from sklearn.metrics import (
     accuracy_score,
     classification_report,
@@ -54,6 +55,36 @@ def get_predictions(
         y_true.extend(label_values)
         y_pred.extend(np.argmax(probabilities, axis=1))
     return np.array(y_true), np.array(y_pred)
+
+
+def measure_inference_time(model: tf.keras.Model, dataset: tf.data.Dataset) -> dict:
+    """Measure inference time over a dataset without using it for training."""
+    total_images = 0
+    start = timer()
+    for images, _ in dataset:
+        model.predict(images, verbose=0)
+        total_images += int(images.shape[0])
+    elapsed_seconds = timer() - start
+    return {
+        "total_images": total_images,
+        "elapsed_seconds": elapsed_seconds,
+        "seconds_per_image": elapsed_seconds / total_images if total_images else 0.0,
+    }
+
+
+def count_trainable_parameters(model: tf.keras.Model) -> dict:
+    """Return total, trainable, and non-trainable parameter counts."""
+    trainable = int(
+        np.sum([tf.keras.backend.count_params(weight) for weight in model.trainable_weights])
+    )
+    non_trainable = int(
+        np.sum([tf.keras.backend.count_params(weight) for weight in model.non_trainable_weights])
+    )
+    return {
+        "total": trainable + non_trainable,
+        "trainable": trainable,
+        "non_trainable": non_trainable,
+    }
 
 
 # ---------------------------------------------------------------------------
