@@ -13,6 +13,7 @@ import numpy as np
 import tensorflow as tf
 from sklearn.metrics import (
     accuracy_score,
+    classification_report,
     precision_score,
     recall_score,
     f1_score,
@@ -47,7 +48,10 @@ def get_predictions(
     y_true, y_pred = [], []
     for images, labels in dataset:
         probabilities = model.predict(images, verbose=0)
-        y_true.extend(labels.numpy())
+        label_values = labels.numpy()
+        if label_values.ndim > 1:
+            label_values = np.argmax(label_values, axis=1)
+        y_true.extend(label_values)
         y_pred.extend(np.argmax(probabilities, axis=1))
     return np.array(y_true), np.array(y_pred)
 
@@ -103,6 +107,20 @@ def compute_confusion_matrix(
     return confusion_matrix(y_true, y_pred)
 
 
+def compute_classification_report(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+    class_names: list = None,
+) -> str:
+    """Return per-class precision, recall, F1, and support."""
+    return classification_report(
+        y_true,
+        y_pred,
+        target_names=class_names,
+        zero_division=0,
+    )
+
+
 # ---------------------------------------------------------------------------
 # Summary helper
 # ---------------------------------------------------------------------------
@@ -113,3 +131,4 @@ def print_summary(y_true: np.ndarray, y_pred: np.ndarray) -> None:
     print(f"Precision: {compute_precision(y_true, y_pred):.4f}")
     print(f"Recall   : {compute_recall(y_true, y_pred):.4f}")
     print(f"F1 Score : {compute_f1(y_true, y_pred):.4f}")
+    print(f"Macro F1 : {compute_f1(y_true, y_pred, average='macro'):.4f}")

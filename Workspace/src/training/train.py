@@ -17,6 +17,7 @@ def train_model(
     val_ds: tf.data.Dataset,
     epochs: int = 20,
     callbacks: list = None,
+    class_weight: dict = None,
 ) -> keras.callbacks.History:
     """Train a compiled Keras model and return its history.
 
@@ -33,6 +34,8 @@ def train_model(
     callbacks : list, optional
         Keras callbacks to apply during training
         (e.g. ``EarlyStopping``, ``ModelCheckpoint``).
+    class_weight : dict, optional
+        Class weights passed through to ``model.fit()`` for imbalanced data.
 
     Returns
     -------
@@ -45,5 +48,6 @@ def train_model(
         validation_data=val_ds,
         epochs=epochs,
         callbacks=callbacks or [],
+        class_weight=class_weight,
     )
     return history
